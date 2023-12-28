@@ -1,0 +1,72 @@
+#!/bin/bash
+# This script displays the user menu
+# and is called from the main script
+#
+# Author: Paul McPhillips
+# Student: 40646715
+
+# Check if script is run as root or with sudo
+if [ "$EUID" -ne 0 ]
+then 
+	echo -e "\e[31mThis script must be run as root\e[0m"
+	exit
+fi
+# Present the menu options
+echo ""
+echo "Enter a choice:"
+echo ""
+echo " 
+	1. View running containers
+	2. Create the containers
+	3. Start containers
+	4. Stop containers
+	5. Copy the files
+	6. Create the document
+	7. Exit
+"
+# Get user input
+read choice
+echo ""
+while true; do
+	case $choice in 
+		1)
+			# 1. View running containers
+			sudo docker ps
+			echo ""
+			source Scripts/Menu
+			;;
+		
+		2)
+			# 2. Create the containers
+			source Scripts/CreateContainers
+			;;
+		3)	
+			# 3. Start containers
+			source Scripts/StartCon
+			;;
+		4)	
+			# 4. Stop containers
+			source Scripts/StopCon
+			;;
+			
+		5)	
+			# 5. Copy the files
+			source Scripts/CopyFiles
+			;;
+		6)
+			# 6. Create the document
+			source Scripts/CreateDocument
+			;;
+		7)
+			# 7. Exit the program
+			echo "Exiting"
+			echo "Goodbye"
+			exit
+			;;
+		*)
+			# Any other key entered
+			echo "Entry not recognized"
+			source Scripts/Menu
+			;;
+	esac
+done

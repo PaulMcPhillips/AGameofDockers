@@ -1,0 +1,45 @@
+#!/bin/bash
+# A script to stop
+# some or all containers
+#
+# Author: Paul McPhillips
+# Student: 40646715
+
+
+# Check if user is root or using sudo
+if [ "$EUID" -ne 0 ]
+then
+	echo "This must be run as root"
+	exit
+fi
+echo ""
+echo "Which container(s) would you like to stop?"
+echo "[container1 container2 ...][All]"
+# Display a list of running containers
+sudo docker ps 
+echo ""
+# Take the choice as an array of answers
+echo "Enter the name(s) of the container(s) you wish to stop."
+echo "Enter All to stop all containers"
+read -p "or 0 to return to the previous menu: " -a choice
+# Check if each answer meets a condition in the case switch
+for each in $choice
+do
+	case $each in
+		"All")
+			echo "Stopping containers: "
+			docker stop $(docker ps -q)
+			echo "All containers stopped"
+			;;
+		"0")
+			return
+			;;
+		*)
+			echo "Stopping container $each"
+			sudo docker stop $each
+			echo "Container $each stopped"
+			;;
+	esac
+done
+echo ""
+source Scripts/Menu

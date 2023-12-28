@@ -1,0 +1,123 @@
+#!/bin/bash
+# This script retreives the
+# text from the files in each
+# container using round robin
+# scheduling to put the data
+# in order
+#
+# Author: Paul McPhillips
+# Student: 40646715
+
+con1_files=()
+con2_files=()
+con3_files=()
+# A function to carry out the process of collecting the files from the containers
+function collect_files() {
+	echo "" > FinalChapter
+	echo "Collecting files"	
+	# Iterate through the files in the containers and save the contents to a text file
+	# Loop through the 3 containers while the con*_files arrays are not empty
+	while [ ${#con1_files[@]} -ne 0 ] || [ ${#con2_files[@]} -ne 0 ] || [ ${#con3_files[@]} -ne 0 ]  
+	do
+		echo ""
+		# Check if array is not empty
+		if [ ${#con1_files[@]} -ne 0 ]
+		then
+			# Create a 2 digit iterator
+			for i in {0..1}
+			do
+				# Take the first item from the array and cat its contents from
+				# the relevant docker container into the document in the root
+				# folder.
+				# Remove the item from the array
+				item=$(sed 's/\r$//' <<< "${con1_files[0]}")
+				echo "Collecting file: ${con1_files[0]} from con1"
+				sudo docker exec con1 cat /home/$item >> FinalChapter
+				con1_files=("${con1_files[@]:1}")
+			done
+		fi	
+		if [ ${#con2_files[@]} -ne 0 ]
+		then
+			for i in {0..1}
+			do
+				item=$(sed 's/\r$//' <<< "${con2_files[0]}")
+				echo "Collecting file: ${con2_files[0]} from con2"
+				sudo docker exec con2 cat /home/$item >> FinalChapter
+				con2_files=("${con2_files[@]:1}")
+			done
+		fi
+		if [ ${#con3_files[@]} -ne 0 ]
+		then
+			for i in {0..1}
+			do
+				item=$(sed 's/\r$//' <<< "${con3_files[0]}")
+				echo "Collecting file: ${con3_files[0]} from con3"
+				sudo docker exec con3 cat /home/$item >> FinalChapter
+				con3_files=("${con3_files[@]:1}")
+			done
+		fi
+
+	done
+	source Scripts/PostDocument
+}
+
+# A function to sort the files according to the first number of the matriculation number
+# Then pass those sorted files to the collect_files function
+function create_documents() {
+	if [ $1 -eq "1" ]
+	then
+		# Sort con2 and con3
+		con1_files=($(sudo docker exec -it con1 ls /home/))
+		con2_files=($(sudo docker exec -it con2 ls -S -r /home/))
+		con3_files=($(sudo docker exec -it con3 ls -S -r /home/))
+		collect_files ${con1_files[@]} ${con2_files[@]} ${con3_files[@]}
+	elif [ $1 -eq "2" ]
+	then
+		# Sort con1 and con2
+		con1_files=($(sudo docker exec -it con1 ls -S -r /home/))
+		con2_files=($(sudo docker exec -it con2 ls -S -r /home/))
+		con3_files=($(sudo docker exec -it con3 ls /home/))
+		collect_files ${con1_files[@]} ${con2_files[@]} ${con3_files[@]}
+	elif [ $1 -eq "3" ]
+	then
+		# Sort con1 and con3
+		con1_files=($(sudo docker exec -it con1 ls -S -r /home/))
+		con2_files=($(sudo docker exec -it con2 ls /home/))
+		con3_files=($(sudo docker exec -it con3 ls -S -r /home/))
+		collect_files ${con1_files[@]} ${con2_files[@]} ${con3_files[@]}
+	fi
+}
+
+# Check if user is root or using sudo
+if [ "$EUID" -ne 0 ]
+then
+	echo -e "\e[31mThis must be run as root\e[0m"
+	exit
+fi
+
+
+# Request the matriculation number to define how the files will be sorted
+echo ""
+read -p "Enter your matriculation number: " matric
+while true; 
+do
+	case ${matric:0:1} in
+		0 | 3 | 6 | 9) 
+			create_documents "1"
+			break	
+			;;
+		1 | 4 | 7)
+			create_documents "2" 
+			break
+			;;
+		2 | 5 | 8)
+		 	create_documents "3" 
+			break
+			;;
+       esac
+done
+
+
+
+source Scripts/Menu
+

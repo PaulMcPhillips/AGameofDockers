@@ -1,0 +1,44 @@
+#!/bin/bash
+# A script to start
+# some or all containers
+#
+# Author: Paul McPhillips
+# Student: 40646715
+
+
+# Check if user is root or using sudo
+if [ "$EUID" -ne 0 ]
+then
+	echo "This must be run as root"
+	exit
+fi
+echo ""
+echo "Which container(s) would you like to (re)start?"
+echo "[container1 container2 ...][All]"
+# Display the list of running containers
+sudo docker ps -a
+echo ""
+# Take the choice as an array of answers
+echo "Enter the name(s) of the container(s) you wish to stop"
+echo "Enter 'All' to stop all containers"
+read -p "or 0 to return to the previous menu: " -a choice
+# Check if each answer meets a condition of the case switch
+for each in "${choice[@]}"
+do
+	case $each in
+		"All")
+			echo "Starting all containers: "
+			docker restart $(docker ps -a -q)
+			echo "All containers started"
+			;;
+		"0")
+			return
+			;;
+		*)
+			echo "Starting container $each"
+			docker restart $each
+			echo "$each started"
+			;;
+	esac
+done
+source Scripts/Menu

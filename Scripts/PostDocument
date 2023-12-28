@@ -1,0 +1,47 @@
+#!/bin/bash
+# This script handles the steps after the document is created.
+# It presents a new menu that asks the user what they'd like
+# to do next whether they'd like to view the file, edit it or 
+# exit the program
+#
+# Author: Paul McPhillips
+# Student: 40646715
+
+# Present a menu asking what the user would like to do with the file
+echo ""
+echo "Document created"
+echo ""
+while true
+do
+	echo ""
+	echo "
+		1. View the document
+		2. Edit the document
+		3. Return to the main menu
+		4. Exit
+	"
+	read -p "Enter a choice: " choice
+	case $choice in
+		1)
+			echo ""
+			cat FinalChapter
+			echo ""
+			;;
+		2)
+			nano FinalChapter
+			;;
+		3)
+			source Scripts/Menu
+			;;
+		4)
+			echo "Exiting"
+			echo "Goodbye"
+			exit
+			;;
+		*)
+			echo "Choice not recognised"
+			;;
+	esac
+done
+
+source Scripts/Menu

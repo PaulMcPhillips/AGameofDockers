@@ -1,0 +1,14 @@
+#!/bin/bash
+# This script copies the
+# files into the container
+#
+# Author: Paul McPhillips
+# Student: 40646715
+if [ "$EUID" -ne 0 ]
+then
+	echo -e "\e[31m This must be run as root\e[0m"
+	exit
+fi
+echo "Fake copying files"
+echo "Fake files copied"
+source Scripts/Menu
